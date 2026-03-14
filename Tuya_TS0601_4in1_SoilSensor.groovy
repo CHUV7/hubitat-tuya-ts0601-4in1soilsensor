@@ -41,7 +41,7 @@ metadata {
         name: "Tuya TS0601 4-in-1 Soil Sensor",
         namespace: "CHUV7",
         author: "CHUV7",
-        importUrl: ""
+        importUrl: "https://raw.githubusercontent.com/CHUV7/hubitat-tuya-ts0601-4in1soilsensor/refs/heads/main/Tuya_TS0601_4in1_SoilSensor.groovy"
     ) {
         capability "RelativeHumidityMeasurement"  // air humidity
         capability "TemperatureMeasurement"
