@@ -1,6 +1,9 @@
-# Tuya TS0601 4-in-1 Soil Sensor — Hubitat Driver
+# Tuya TS0601 Arteco ZS-301Z 4-in-1 Soil Sensor — Hubitat Driver
 
-A Hubitat Elevation driver for the Tuya TS0601 4-in-1 soil sensor (`_TZE284_0ints6wl`). Communicates over Zigbee using the Tuya EF00 private cluster.
+A Hubitat Elevation driver for the Tuya TS0601 or Arteco ZS-301Z 4-in-1 soil sensor (https://www.zigbee2mqtt.io/devices/ZS-301Z.html#arteco-zs-301z). 
+Communicates over Zigbee using the Tuya EF00 private cluster.
+
+![hubitat-tuya-ts0601-4in1soilsensor](ZS-301Z.png)
 
 ---
 
@@ -8,7 +11,7 @@ A Hubitat Elevation driver for the Tuya TS0601 4-in-1 soil sensor (`_TZE284_0int
 
 | Model | Manufacturer Code |
 |-------|-------------------|
-| TS0601 | `_TZE284_0ints6wl` |
+| TS0601 / TZ-TR-301Z | `_TZE284_0ints6wl` |
 
 The device measures four things simultaneously:
 - Soil moisture (when probe is inserted into soil)
@@ -21,7 +24,7 @@ The device measures four things simultaneously:
 ## Installation
 
 1. In Hubitat, go to **Drivers Code → New Driver**
-2. Paste the contents of `Tuya_TS0601_4in1_SoilSensor.groovy` and click **Save**
+2. Paste the contents of `TZ-TR-301Z.groovy` and click **Save**
 3. Pair your sensor to Hubitat as usual — it should auto-match via the fingerprint
 4. If it doesn't auto-match, go to the device page and manually select **Tuya TS0601 4-in-1 Soil Sensor** from the driver dropdown
 5. Click **Configure** to initialise the device and push the default sample interval
