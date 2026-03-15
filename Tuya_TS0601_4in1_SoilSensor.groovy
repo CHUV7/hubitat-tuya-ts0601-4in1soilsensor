@@ -60,6 +60,7 @@ metadata {
         attribute "humidityCalibration", "number"
         attribute "luxCalibration",      "number"
         attribute "tempCalibration",     "number"
+        attribute "illuminance",         "number"
 
         fingerprint profileId: "0104", endpointId: "01",
                     inClusters: "0000,0004,0005,EF00,ED00",
@@ -76,6 +77,7 @@ metadata {
         input name: "createMoistureChild",   type: "bool", title: "Create child device for Soil Moisture",   defaultValue: true
         input name: "createTempChild",       type: "bool", title: "Create child device for Air Temperature", defaultValue: true
         input name: "createHumidityChild",   type: "bool", title: "Create child device for Air Humidity",    defaultValue: true
+        input name: "createIlluminanceChild", type: "bool", title: "Create child device for Illuminance",    defaultValue: true
         input name: "sampleInterval", type: "enum", title: "Soil Sample Interval (hours)",
                                        options: ["1","2","3","4","5","6","7","8","9","10","11","12",
                                                  "13","14","15","16","17","18","19","20","21","22","23","24"],
@@ -130,9 +132,10 @@ metadata {
 ]
 
 @Field static final Map CHILD_CONFIG = [
-    "moisture": [driver: "Generic Component Humidity Sensor",     label: "Soil Moisture"],
-    "temp"    : [driver: "Generic Component Temperature Sensor",  label: "Air Temp"],
-    "humidity": [driver: "Generic Component Humidity Sensor",     label: "Air Humidity"]
+    "moisture": 	[driver: "Generic Component Humidity Sensor",     	label: "Soil Moisture"],
+    "temp"    :		[driver: "Generic Component Temperature Sensor",  	label: "Air Temp"],
+    "humidity": 	[driver: "Generic Component Humidity Sensor",    	label: "Air Humidity"],
+    "illuminance": 	[driver: "Component Illuminance Sensor",			label: "Illuminance"]
 ]
 
 // ── Lifecycle ────────────────────────────────────────────────────────────────
@@ -153,7 +156,7 @@ def configure() {
     log.info "${device.displayName} configure()"
     manageChildren()
     setSampleInterval()
-    return [zigbee.command(0xEF00, 0x03, "")]
+    return zigbee.command(0xEF00, 0x03, "")
 }
 
 def initialize() {
@@ -169,9 +172,10 @@ def logsOff() {
 
 // ── Child device management ───────────────────────────────────────────────────
 private void manageChildren() {
-    manageChild("moisture", createMoistureChild != false)
-    manageChild("temp",     createTempChild     != false)
-    manageChild("humidity", createHumidityChild != false)
+    manageChild("moisture", 	createMoistureChild 	!= false)
+    manageChild("temp",     	createTempChild     	!= false)
+    manageChild("humidity", 	createHumidityChild 	!= false)
+    manageChild("illuminance",	createIlluminanceChild 	!= false)
 }
 
 private void manageChild(String suffix, boolean shouldExist) {
@@ -362,6 +366,7 @@ private void handleIlluminance(int raw) {
     def descText = "Illuminance is ${raw} lux"
     if (txtEnable) log.info "${device.displayName} ${descText}"
     sendEvent(name: "illuminance", value: raw, unit: "lux", descriptionText: descText)
+    updateChild("illuminance", "illuminance", raw, "lux", descText)
 }
 
 private void handleBatteryState(int raw) {
