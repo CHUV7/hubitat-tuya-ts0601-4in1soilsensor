@@ -1,10 +1,11 @@
 /*
- * Tuya TS0601 4-in-1 Soil Sensor
+ * Tuya TS0601 or Arteco ZS-301Z 4-in-1 Soil Sensor
  * Device/Manufacturer: _TZE284_0ints6wl
  *
- * A Hubitat driver for the Tuya TS0601 4-in-1 soil sensor, which measures
+ * A Hubitat driver for the Tuya TS0601 / Arteco ZS-301Z 4-in-1 soil sensor, which measures
  * soil moisture, air temperature, air humidity, and illuminance over Zigbee
  * using the Tuya EF00 private cluster.
+ * https://www.zigbee2mqtt.io/devices/ZS-301Z.html
  *
  * Features:
  *  - Soil moisture, air temperature, air humidity, illuminance reporting
