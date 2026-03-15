@@ -11,7 +11,7 @@
  *  - Soil moisture, air temperature, air humidity, illuminance reporting
  *  - Battery state and percentage
  *  - Soil/water medium detection warnings (dp 110, 111)
- *  - Adjustable sample interval (1–24 hours, written to device on save)
+ *  - Adjustable sample interval (30-1200 seconds, written to device on save)
  *  - Optional child devices for moisture, temperature, and humidity
  *  - Temperature offset, humidity offset, moisture offset, and unit preferences
  *  - EF00 write acknowledgement handling (0x0B)
@@ -33,6 +33,7 @@
  * Author: CHUV7 with the extreme help of Claude AI
  * Changelog:
  *  2026-03-14 - Initial release
+ *  2026-03-15 - Illuminance child object add, corrected sample interval time to 30-1200 as per most recent documentation from zigbee2mqtt.
  */
 
 import groovy.transform.Field
@@ -79,10 +80,8 @@ metadata {
         input name: "createTempChild",       type: "bool", title: "Create child device for Air Temperature", defaultValue: true
         input name: "createHumidityChild",   type: "bool", title: "Create child device for Air Humidity",    defaultValue: true
         input name: "createIlluminanceChild", type: "bool", title: "Create child device for Illuminance",    defaultValue: true
-        input name: "sampleInterval", type: "enum", title: "Soil Sample Interval (hours)",
-                                       options: ["1","2","3","4","5","6","7","8","9","10","11","12",
-                                                 "13","14","15","16","17","18","19","20","21","22","23","24"],
-                                       defaultValue: "2"
+        input name: "sampleInterval", type: "number", title: "Soil Sample Interval (seconds)",
+                               range: "30..1200", defaultValue: 600
         input name: "logEnable",  type: "bool", title: "Enable Debug Logging",            defaultValue: true
         input name: "txtEnable",  type: "bool", title: "Enable Description Text Logging", defaultValue: true
     }
@@ -114,9 +113,9 @@ metadata {
 ]
 
 @Field static final Map BATTERY_PCT_MAP = [
-    0: 10,
-    1: 50,
-    2: 100
+    0: 10,   // represents 1-25%
+    1: 38,   // represents 26-50%
+    2: 75    // represents 51-100%
 ]
 
 // DP 110 — inserted into soil vs water vs air (4-in-1 mode detection)
@@ -205,12 +204,11 @@ private void updateChild(String suffix, String eventName, def value, String unit
 
 // ── Sample interval ───────────────────────────────────────────────────────────
 private void setSampleInterval() {
-    int hours   = (sampleInterval ?: "2").toInteger()
-    int seconds = hours * 3600
+    int seconds = (sampleInterval ?: 600).toInteger()
+    seconds = Math.max(30, Math.min(1200, seconds))
 
-    // Tuya EF00 write: dp=103 (0x67), dp_type=0x02 (int32), length=0x0004, value as 4 bytes
     String payload = "00670200" + String.format("%08X", seconds)
-    if (logEnable) log.debug "${device.displayName} setSampleInterval() ${hours}h = ${seconds}s payload=${payload}"
+    if (logEnable) log.debug "${device.displayName} setSampleInterval() ${seconds}s payload=${payload}"
     sendHubCommand(new hubitat.device.HubAction(
         zigbee.command(0xEF00, 0x00, payload)[0],
         hubitat.device.Protocol.ZIGBEE
@@ -280,11 +278,10 @@ def parse(String description) {
             handleBatteryState(fncmd)
             break
         case "soilSampleInterval":
-            int hrs = fncmd / 3600
-            if (logEnable) log.debug "${device.displayName} soil sample interval = ${fncmd}s (${hrs}h)"
-            sendEvent(name: "soilSampleInterval", value: hrs, unit: "h",
-                      descriptionText: "Soil sample interval is ${hrs}h (${fncmd}s)")
-            break
+    		if (logEnable) log.debug "${device.displayName} soil sample interval = ${fncmd}s"
+    		sendEvent(name: "soilSampleInterval", value: fncmd, unit: "s",
+            		descriptionText: "Soil sample interval is ${fncmd}s")
+    		break
         case "soilCalibration":
             if (logEnable) log.debug "${device.displayName} soil calibration = ${fncmd}"
             sendEvent(name: "soilCalibration", value: fncmd,
